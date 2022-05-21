@@ -17,6 +17,10 @@ public class Player : MonoBehaviour
     private Rigidbody2D _myRigidbody2D;
     private float _kunaiDistance;
     private SpriteRenderer _spriteRenderer;
+    
+    public AudioClip[] audioClips;
+
+    private AudioSource _audioSource;
 
     private int _playerLife;
 
@@ -29,6 +33,7 @@ public class Player : MonoBehaviour
         myAnimator = GetComponent<Animator>();
         _myRigidbody2D = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _audioSource = GetComponent<AudioSource>();
 
         isJumpPressed = false;
         canJump = true;
@@ -61,6 +66,16 @@ public class Player : MonoBehaviour
             isAttack = true;
             canJump = false;
         }
+    }
+
+    public void PlaySwordEffect()
+    {
+        _audioSource.PlayOneShot(audioClips[3]);
+    }
+
+    public void PlayKunaiEffect()
+    {
+        _audioSource.PlayOneShot(audioClips[2]);
     }
 
     private void FixedUpdate()
@@ -101,6 +116,12 @@ public class Player : MonoBehaviour
         if (col.CompareTag("Enemy"))
         {
             OnEnemy();
+        }     
+        
+        if (col.CompareTag("Item"))
+        {
+            _audioSource.PlayOneShot(audioClips[1]);
+            Destroy(col.gameObject);
         }
     }
 
@@ -108,6 +129,8 @@ public class Player : MonoBehaviour
     {
         if (!isHart && canBeHurt)
         {
+            _audioSource.PlayOneShot(audioClips[0]);
+            
             _playerLife--;
             if (_playerLife >= 1)
             {
