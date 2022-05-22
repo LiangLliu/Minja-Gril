@@ -30,7 +30,7 @@ namespace Enemy.EnemyMaleZomble
         protected static readonly int Die = Animator.StringToHash("Die");
 
         // Start is called before the first frame update
-        public void Awake()
+        protected virtual void Awake()
         {
             myAnimator = GetComponent<Animator>();
             myBoxCollider2D = GetComponent<BoxCollider2D>();
@@ -129,7 +129,7 @@ namespace Enemy.EnemyMaleZomble
             attackCollider.SetActive(false);
         }
 
-        private void OnTriggerEnter2D(Collider2D col)
+        protected virtual void OnTriggerEnter2D(Collider2D col)
         {
             if (col.CompareTag("PlayerAttack"))
             {

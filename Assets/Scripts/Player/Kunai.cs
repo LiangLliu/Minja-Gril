@@ -28,7 +28,7 @@ public class Kunai : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.isTrigger)
+        if (col.isTrigger && !col.CompareTag("StopPoint"))
         {
             Destroy(this.gameObject);
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -17,12 +18,12 @@ public class Player : MonoBehaviour
     private Rigidbody2D _myRigidbody2D;
     private float _kunaiDistance;
     private SpriteRenderer _spriteRenderer;
-    
+
     public AudioClip[] audioClips;
 
     private AudioSource _audioSource;
 
-    private int _playerLife;
+    public int playerLife;
 
     [HideInInspector] public bool isJumpPressed, canJump, isAttack, isHart, canBeHurt;
     private static readonly int Hurt = Animator.StringToHash("Hurt");
@@ -40,7 +41,6 @@ public class Player : MonoBehaviour
         isAttack = false;
         isHart = false;
         canBeHurt = true;
-        _playerLife = 3;
     }
 
     private void Update()
@@ -65,6 +65,19 @@ public class Player : MonoBehaviour
             myAnimator.SetTrigger(AttackThrow);
             isAttack = true;
             canJump = false;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.collider.name == "BoardBottom")
+        {
+            _audioSource.PlayOneShot(audioClips[4]);
+            playerLife = 0;
+            isHart = true;
+            isAttack = true;
+            _myRigidbody2D.velocity = new Vector2(0f, 0f);
+            myAnimator.SetBool(Dead, true);
         }
     }
 
@@ -116,8 +129,8 @@ public class Player : MonoBehaviour
         if (col.CompareTag("Enemy"))
         {
             OnEnemy();
-        }     
-        
+        }
+
         if (col.CompareTag("Item"))
         {
             _audioSource.PlayOneShot(audioClips[1]);
@@ -129,11 +142,10 @@ public class Player : MonoBehaviour
     {
         if (!isHart && canBeHurt)
         {
-            _audioSource.PlayOneShot(audioClips[0]);
-            
-            _playerLife--;
-            if (_playerLife >= 1)
+            playerLife--;
+            if (playerLife >= 1)
             {
+                _audioSource.PlayOneShot(audioClips[0]);
                 isHart = true;
                 canBeHurt = false;
 
@@ -154,12 +166,12 @@ public class Player : MonoBehaviour
             }
             else
             {
+                _audioSource.PlayOneShot(audioClips[4]);
                 isHart = true;
                 isAttack = true;
                 _myRigidbody2D.velocity = new Vector2(0f, 0f);
                 myAnimator.SetBool(Dead, true);
             }
-            
         }
     }
 

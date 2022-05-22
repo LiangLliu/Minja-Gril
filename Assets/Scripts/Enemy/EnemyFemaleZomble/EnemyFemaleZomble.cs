@@ -6,51 +6,79 @@ namespace Enemy.EnemyFemaleZomble
     {
         public float runSpeed;
 
+        private bool _isBattleMode;
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            _isBattleMode = true;
+        }
+
         protected override void MoveAndAttack()
         {
             if (!isAlive) return;
-            if (Vector3.Distance(myPlayer.transform.position, transform.position) < 4.0f)
+            if (_isBattleMode)
             {
-                transform.localScale = myPlayer.transform.position.x <= transform.position.x
+                if (Vector3.Distance(myPlayer.transform.position, transform.position) < 4.0f)
+                {
+                    transform.localScale = myPlayer.transform.position.x <= transform.position.x
+                        ? new Vector3(-1.0f, 1.0f, 1.0f)
+                        : new Vector3(1.0f, 1.0f, 1.0f);
+
+                    var newtarget = new Vector3(myPlayer.transform.position.x, transform.position.y,
+                        transform.position.z);
+                    if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Walk"))
+                    {
+                        transform.position =
+                            Vector3.MoveTowards(transform.position, newtarget, runSpeed * Time.deltaTime);
+                    }
+
+                    isAfterBattleCheck = true;
+                    return;
+                }
+
+                if (isAfterBattleCheck)
+                {
+                    if (transform.position.x > tempPosition.x || transform.position.x < tempPosition.x)
+                    {
+                        transform.localPosition = transform.position.x > tempPosition.x
+                            ? new Vector3(-1.0f, 1.0f, 1.0f)
+                            : new Vector3(1.0f, 1.0f, 1.0f);
+                    }
+                    else
+                    {
+                        if (tempPosition == targetPosition)
+                        {
+                            StartCoroutine(TurnRight(false));
+                        }
+                        else if (tempPosition == originPosition)
+                        {
+                            StartCoroutine(TurnRight(true));
+                        }
+                    }
+
+                    isAfterBattleCheck = false;
+                }
+            }
+            else
+            {
+                transform.localPosition = transform.position.x > tempPosition.x
                     ? new Vector3(-1.0f, 1.0f, 1.0f)
                     : new Vector3(1.0f, 1.0f, 1.0f);
 
-                var newtarget = new Vector3(myPlayer.transform.position.x, transform.position.y, transform.position.z);
                 if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Walk"))
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, newtarget, runSpeed * Time.deltaTime);
+                    transform.position =
+                        Vector3.MoveTowards(transform.position, tempPosition, mySpeed * Time.deltaTime);
                 }
 
-                isAfterBattleCheck = true;
+                if (transform.position == tempPosition)
+                {
+                    _isBattleMode = true;
+                }
+
                 return;
-            }
-
-            if (isAfterBattleCheck)
-            {
-                if (transform.position.x > tempPosition.x || transform.position.x < tempPosition.x)
-                {
-                    if (transform.position.x > tempPosition.x)
-                    {
-                        transform.localPosition = new Vector3(-1.0f, 1.0f, 1.0f);
-                    }
-                    else if (transform.position.x < tempPosition.x)
-                    {
-                        transform.localPosition = new Vector3(1.0f, 1.0f, 1.0f);
-                    }
-                }
-                else
-                {
-                    if (tempPosition == targetPosition)
-                    {
-                        StartCoroutine(TurnRight(false));
-                    }
-                    else if (tempPosition == originPosition)
-                    {
-                        StartCoroutine(TurnRight(true));
-                    }
-                }
-
-                isAfterBattleCheck = false;
             }
 
             if (transform.position.x == targetPosition.x)
@@ -74,6 +102,21 @@ namespace Enemy.EnemyFemaleZomble
             if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Walk"))
             {
                 transform.position = Vector3.MoveTowards(transform.position, tempPosition, mySpeed * Time.deltaTime);
+            }
+        }
+
+        protected override void OnTriggerEnter2D(Collider2D col)
+        {
+            base.OnTriggerEnter2D(col);
+
+            if (col.CompareTag("StopPoint"))
+            {
+                _isBattleMode = false;
+            }
+            
+            if (col.CompareTag("PlayerAttack"))
+            {
+                _isBattleMode = true;
             }
         }
     }
